@@ -139,4 +139,27 @@ th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border)
 th { color: var(--text-muted); font-weight: 500; font-size: 0.875rem; background: rgba(0,0,0,0.2); }
 tbody tr:hover { background: rgba(255,255,255,0.02); }
 
+/* Role based UI toggle */
+.role-admin, .role-retailer, .role-wholesaler { display: none !important; }
+
+body[data-role="admin"] .role-admin,
+body[data-role="retailer"] .role-retailer,
+body[data-role="wholesaler"] .role-wholesaler,
+body[data-role="admin"] .dashboard-admin,
+body[data-role="retailer"] .dashboard-retailer,
+body[data-role="wholesaler"] .dashboard-wholesaler { display: block !important; }
+
+.dashboard-admin, .dashboard-retailer, .dashboard-wholesaler { display: none; }
+body[data-role="admin"] .charts-grid.dashboard-admin { display: grid !important; }
+body[data-role="wholesaler"] .charts-grid.dashboard-wholesaler { display: grid !important; }
+body[data-role="admin"] .stats-grid.dashboard-admin { display: grid !important; }
+body[data-role="retailer"] .stats-grid.dashboard-retailer { display: grid !important; }
+body[data-role="wholesaler"] .stats-grid.dashboard-wholesaler { display: grid !important; }
+
+/* UI action buttons */
+.btn-small { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+.btn-success { background: var(--secondary); color: white; border: none; border-radius: 4px; cursor: pointer; }
+.btn-success:hover { filter: brightness(1.2); }
+.status-select { background: var(--dark); border: 1px solid var(--border); color: white; padding: 0.3rem; border-radius: 4px; }
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

@@ -30,92 +30,38 @@ db.serialize(() => {
     db.run(`INSERT INTO Admin (Name, Password) VALUES ('retailer', 'retailer123')`);
     db.run(`INSERT INTO Admin (Name, Password) VALUES ('wholesaler', 'wholesaler123')`);
 
-    function loadExcel(filename, table, columns, mapFn) {
+    function loadExcel(filename, sheetName, table, columns, mapFn) {
         try {
             const filepath = path.resolve(__dirname, '..', filename);
             if (fs.existsSync(filepath)) {
                 const workbook = xlsx.readFile(filepath);
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const data = xlsx.utils.sheet_to_json(sheet);
-                const stmt = db.prepare(`INSERT INTO ${table} (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`);
-                data.forEach(row => {
-                    const mapped = mapFn(row);
-                    stmt.run(...mapped, err => { if (err) console.log(err.message) });
-                });
-                stmt.finalize();
-                console.log(`Loaded ${data.length} records into ${table} from ${filename}`);
+                const sheet = workbook.Sheets[sheetName];
+                if (sheet) {
+                    const data = xlsx.utils.sheet_to_json(sheet);
+                    const stmt = db.prepare(`INSERT INTO ${table} (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`);
+                    data.forEach(row => {
+                        const mapped = mapFn(row);
+                        stmt.run(...mapped, err => { if (err) console.log(err.message) });
+                    });
+                    stmt.finalize();
+                    console.log(`Loaded ${data.length} records into ${table} from ${filename} (${sheetName})`);
+                }
             }
-        } catch (e) { console.error('Error loading excel', filename, e); }
+        } catch (e) { console.error('Error loading excel', filename, sheetName, e); }
     }
 
-    // Load Excel Data
-    loadExcel('StockSphere_200Rows (1).xlsx', 'Suppliers', ['SupplierID', 'SupplierName', 'Contact', 'Email', 'Address'], r => [r.SupplierID, r.SupplierName, r.Contact, r.Email, r.Address]);
-    loadExcel('StockSphere_Payment_Delivery_FIXED.xlsx', 'Payment', ['PaymentID', 'OrderID', 'PaymentMethod', 'PaymentStatus'], r => [r.PaymentID, r.OrderID, r.PaymentMethod, r.PaymentStatus]);
-    loadExcel('StockSphere_Retailer_Wholesaler.xlsx', 'Wholesaler', ['WholesalerID', 'WholesalerName', 'Contact', 'Address', 'GSTNumber'], r => [r.WholesalerID, r.WholesalerName, r.Contact, r.Address, r.GSTNumber]);
+    // Load ALL exact Excel Data
+    loadExcel('StockSphere_200Rows (1).xlsx', 'Suppliers', 'Suppliers', ['SupplierID', 'SupplierName', 'Contact', 'Email', 'Address'], r => [r.SupplierID, r.SupplierName, r.Contact, r.Email, r.Address]);
+    loadExcel('StockSphere_200Rows (1).xlsx', 'Products', 'Products', ['ProductID', 'ProductName', 'Category', 'Price', 'StockQuantity'], r => [r.ProductID, r.ProductName, r.Category, r.Price, r.Stock]);
+    loadExcel('StockSphere_200Rows (1).xlsx', 'Customers', 'Customers', ['CustomerID', 'Name', 'Contact', 'Address'], r => [r.CustomerID, r.CustomerName, r.Phone, r.Address]);
+    loadExcel('StockSphere_200Rows (1).xlsx', 'Orders', 'Orders', ['OrderID', 'CustomerID', 'OrderDate', 'TotalAmount'], r => [r.OrderID, r.CustomerID, r.OrderDate, r.TotalAmount]);
+    loadExcel('StockSphere_200Rows (1).xlsx', 'OrderDetails', 'OrderDetails', ['OrderDetailID', 'OrderID', 'ProductID', 'Quantity', 'Price'], r => [r.OrderDetailID, r.OrderID, r.ProductID, r.Quantity, r.Price]);
 
-    // Programmatically Generate 200 Records for each remaining table
-    const categories = ['Dairy', 'Bakery', 'Beverages', 'Snacks', 'Pantry'];
-    const statuses = ['Delivered', 'Pending', 'In Transit'];
+    loadExcel('StockSphere_Payment_Delivery_FIXED.xlsx', 'Payment', 'Payment', ['PaymentID', 'OrderID', 'PaymentMethod', 'PaymentStatus'], r => [r.PaymentID, r.OrderID, r.PaymentMethod, r.PaymentStatus]);
+    loadExcel('StockSphere_Payment_Delivery_FIXED.xlsx', 'Delivery', 'Delivery', ['DeliveryID', 'OrderID', 'DeliveryStatus', 'DeliveryDate'], r => [r.DeliveryID, r.OrderID, r.DeliveryStatus, r.DeliveryDate]);
 
-    // 200 Products
-    const prodStmt = db.prepare(`INSERT INTO Products (ProductName, Category, Price, StockQuantity) VALUES (?, ?, ?, ?)`);
-    for (let i = 1; i <= 200; i++) {
-        prodStmt.run(
-            `Product ${i}`,
-            categories[Math.floor(Math.random() * categories.length)],
-            parseFloat((Math.random() * 900 + 10).toFixed(2)),
-            Math.floor(Math.random() * 200)
-        );
-    }
-    prodStmt.finalize();
-
-    // 200 Customers
-    const custStmt = db.prepare(`INSERT INTO Customers (Name, Contact, Address) VALUES (?, ?, ?)`);
-    for (let i = 1; i <= 200; i++) {
-        custStmt.run(`Customer ${i}`, `98765${i.toString().padStart(5, '0')}`, `${i} Main St`);
-    }
-    custStmt.finalize();
-
-    // 200 Orders
-    const ordStmt = db.prepare(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (?, ?, ?)`);
-    for (let i = 1; i <= 200; i++) {
-        const month = String(Math.floor(Math.random() * 12 + 1)).padStart(2, '0');
-        const day = String(Math.floor(Math.random() * 28 + 1)).padStart(2, '0');
-        ordStmt.run(
-            Math.floor(Math.random() * 200) + 1,
-            `2026-${month}-${day}`,
-            parseFloat((Math.random() * 4950 + 50).toFixed(2))
-        );
-    }
-    ordStmt.finalize();
-
-    // 200 Order Details
-    const odStmt = db.prepare(`INSERT INTO OrderDetails (OrderID, ProductID, Quantity, Price) VALUES (?, ?, ?, ?)`);
-    for (let i = 1; i <= 200; i++) {
-        odStmt.run(
-            Math.floor(Math.random() * 200) + 1,
-            Math.floor(Math.random() * 200) + 1,
-            Math.floor(Math.random() * 20) + 1,
-            parseFloat((Math.random() * 900 + 10).toFixed(2))
-        );
-    }
-    odStmt.finalize();
-
-    // 200 Deliveries
-    const delStmt = db.prepare(`INSERT INTO Delivery (OrderID, DeliveryStatus, DeliveryDate) VALUES (?, ?, ?)`);
-    for (let i = 1; i <= 200; i++) {
-        const status = statuses[Math.floor(Math.random() * statuses.length)];
-        const date = status === 'Delivered' ? `2026-03-${String(Math.floor(Math.random() * 28 + 1)).padStart(2, '0')}` : '';
-        delStmt.run(Math.floor(Math.random() * 200) + 1, status, date);
-    }
-    delStmt.finalize();
-
-    // 200 Retailers
-    const retStmt = db.prepare(`INSERT INTO Retailer (RetailerName, Contact, Address) VALUES (?, ?, ?)`);
-    for (let i = 1; i <= 200; i++) {
-        retStmt.run(`Retailer ${i}`, `555-${i.toString().padStart(4, '0')}`, `Address ${i}`);
-    }
-    retStmt.finalize();
+    loadExcel('StockSphere_Retailer_Wholesaler.xlsx', 'Wholesaler', 'Wholesaler', ['WholesalerID', 'WholesalerName', 'Contact', 'Address', 'GSTNumber'], r => [r.WholesalerID, r.WholesalerName, r.Contact, r.Address, r.GSTNumber]);
+    loadExcel('StockSphere_Retailer_Wholesaler.xlsx', 'Retailer', 'Retailer', ['RetailerID', 'RetailerName', 'Contact', 'Address'], r => [r.RetailerID, r.RetailerName, r.Contact, r.Address]);
 
     console.log('Database seeded and ready.');
 });

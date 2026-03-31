@@ -1,7 +1,8 @@
+let currentUser = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
     
     // Check Auth
-    let currentUser = null;
     try {
         const session = await API.checkSession();
         if (session.authenticated) {
@@ -72,46 +73,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showLogin() {
         document.getElementById('app-view').classList.remove('active');
         document.getElementById('login-view').classList.add('active');
+        document.body.removeAttribute('data-role');
     }
 
     function showApp() {
         document.getElementById('login-view').classList.remove('active');
         document.getElementById('app-view').classList.add('active');
         
+        document.body.setAttribute('data-role', currentUser.role);
+        
         document.getElementById('user-role-badge').innerText = currentUser.role.toUpperCase();
         document.getElementById('welcome-msg').innerText = `Welcome, ${currentUser.username}`;
         
-        loadDashboard();
+        // Auto click dashboard first
+        document.querySelector('a[data-target="dashboard"]').click();
     }
 
     // Load Dashboard Stats
     async function loadDashboard() {
         try {
             const stats = await API.get('dashboard-stats');
-            document.getElementById('stat-products').innerText = stats.products;
-            document.getElementById('stat-orders').innerText = stats.orders;
-            document.getElementById('stat-revenue').innerText = UI.formatCurrency(stats.revenue);
-            document.getElementById('stat-customers').innerText = stats.customers;
-            document.getElementById('stat-low-stock').innerText = stats.lowStock;
 
-            // Load Charts
-            Charts.renderDashboardCharts();
-
-            // Load Advanced Insights
-            const adv = await API.get('advanced-analysis');
-            const inc = document.getElementById('insights-container');
-            inc.innerHTML = `
-                <div class="insight-item"><span>Estimated Profit</span><strong>${UI.formatCurrency(adv.estimatedProfit)}</strong></div>
-                <div class="insight-item"><span>Best Selling Product</span><strong>${adv.bestSellingProduct}</strong></div>
-                <div class="insight-item"><span>Least Selling Product</span><strong>${adv.leastSellingProduct}</strong></div>
-                <div class="insight-item"><span>Most Active Customer</span><strong>${adv.mostActiveCustomer}</strong></div>
-                <div class="insight-item"><span>Pending Deliveries</span><strong>${adv.pendingDeliveries}</strong></div>
-                <div class="insight-item"><span>Total Gross Revenue</span><strong>${UI.formatCurrency(adv.totalRevenue)}</strong></div>
-            `;
-            
-        } catch(e) {
-            console.error('Error loading dashboard', e);
-        }
+            if (currentUser.role === 'admin') {
+                document.getElementById('stat-products').innerText = stats.products;
+                document.getElementById('stat-orders').innerText = stats.orders;
+                document.getElementById('stat-revenue').innerText = UI.formatCurrency(stats.revenue);
+                document.getElementById('stat-customers').innerText = stats.customers;
+                document.getElementById('stat-low-stock').innerText = stats.lowStock;
+                Charts.renderDashboardCharts();
+                const adv = await API.get('advanced-analysis');
+                const inc = document.getElementById('insights-container');
+                inc.innerHTML = `
+                    <div class="insight-item"><span>Estimated Profit</span><strong>${UI.formatCurrency(adv.estimatedProfit)}</strong></div>
+                    <div class="insight-item"><span>Best Selling Product</span><strong>${adv.bestSellingProduct}</strong></div>
+                    <div class="insight-item"><span>Least Selling Product</span><strong>${adv.leastSellingProduct}</strong></div>
+                    <div class="insight-item"><span>Most Active Customer</span><strong>${adv.mostActiveCustomer}</strong></div>
+                    <div class="insight-item"><span>Pending Deliveries</span><strong>${adv.pendingDeliveries}</strong></div>
+                    <div class="insight-item"><span>Total Gross Revenue</span><strong>${UI.formatCurrency(adv.totalRevenue)}</strong></div>
+                `;
+            } else if (currentUser.role === 'retailer') {
+                document.getElementById('ret-orders').innerText = stats.orders;
+                document.getElementById('ret-spent').innerText = UI.formatCurrency(stats.spent);
+                document.getElementById('ret-available').innerText = stats.availableProducts;
+            } else if (currentUser.role === 'wholesaler') {
+                document.getElementById('wh-deliveries').innerText = stats.totalDeliveries;
+                document.getElementById('wh-pending').innerText = stats.pendingDeliveries;
+                document.getElementById('wh-products').innerText = stats.totalProducts;
+                Charts.renderDashboardCharts();
+            }
+        } catch(e) { console.error('Error loading dashboard', e); }
     }
 
     // Load Data Tables
@@ -124,9 +134,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await API.get(endpoint);
             if (data && data.length > 0) {
                 const headers = Object.keys(data[0]);
-                UI.renderTable(headers, data);
+                UI.renderTable(headers, data, currentUser.role, endpoint);
             } else {
-                UI.renderTable([], []);
+                UI.renderTable([], [], currentUser.role, endpoint);
             }
         } catch(e) {
             document.getElementById('table-body').innerHTML = `<tr><td colspan="100%" style="color:red">Error loading data: ${e.message}</td></tr>`;

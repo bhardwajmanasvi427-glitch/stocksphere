@@ -12,7 +12,7 @@ const Charts = {
             this.createLineChart('salesTrendChart', 
                 data.salesTrend.map(d => d.OrderDate), 
                 data.salesTrend.map(d => d.Total), 
-                'Revenue ($)', '#10B981'
+                'Revenue (₹)', '#10B981'
             );
 
             // 2. Top Selling (Bar)
