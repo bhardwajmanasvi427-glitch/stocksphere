@@ -33,19 +33,19 @@ db.serialize(() => {
     function loadExcel(filename, table, columns, mapFn) {
         try {
             const filepath = path.resolve(__dirname, '..', filename);
-            if(fs.existsSync(filepath)) {
+            if (fs.existsSync(filepath)) {
                 const workbook = xlsx.readFile(filepath);
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
                 const data = xlsx.utils.sheet_to_json(sheet);
                 const stmt = db.prepare(`INSERT INTO ${table} (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`);
                 data.forEach(row => {
                     const mapped = mapFn(row);
-                    stmt.run(...mapped, err => { if(err) console.log(err.message) });
+                    stmt.run(...mapped, err => { if (err) console.log(err.message) });
                 });
                 stmt.finalize();
                 console.log(`Loaded ${data.length} records into ${table} from ${filename}`);
             }
-        } catch(e) { console.error('Error loading excel', filename, e); }
+        } catch (e) { console.error('Error loading excel', filename, e); }
     }
 
     // Load Excel Data
@@ -53,55 +53,68 @@ db.serialize(() => {
     loadExcel('StockSphere_Payment_Delivery_FIXED.xlsx', 'Payment', ['PaymentID', 'OrderID', 'PaymentMethod', 'PaymentStatus'], r => [r.PaymentID, r.OrderID, r.PaymentMethod, r.PaymentStatus]);
     loadExcel('StockSphere_Retailer_Wholesaler.xlsx', 'Wholesaler', ['WholesalerID', 'WholesalerName', 'Contact', 'Address', 'GSTNumber'], r => [r.WholesalerID, r.WholesalerName, r.Contact, r.Address, r.GSTNumber]);
 
-    // Sample Products
+    // Programmatically Generate 200 Records for each remaining table
+    const categories = ['Dairy', 'Bakery', 'Beverages', 'Snacks', 'Pantry'];
+    const statuses = ['Delivered', 'Pending', 'In Transit'];
+
+    // 200 Products
     const prodStmt = db.prepare(`INSERT INTO Products (ProductName, Category, Price, StockQuantity) VALUES (?, ?, ?, ?)`);
-    const products = [
-        ['Organic Milk', 'Dairy', 50, 150], ['Whole Wheat Bread', 'Bakery', 40, 50],
-        ['Premium Coffee', 'Beverages', 450, 5], ['Green Tea', 'Beverages', 200, 45],
-        ['Almonds', 'Snacks', 600, 8], ['Olive Oil', 'Pantry', 800, 30],
-        ['Apple Juice', 'Beverages', 120, 100], ['Dark Chocolate', 'Snacks', 150, 2]
-    ];
-    products.forEach(p => prodStmt.run(...p));
+    for (let i = 1; i <= 200; i++) {
+        prodStmt.run(
+            `Product ${i}`,
+            categories[Math.floor(Math.random() * categories.length)],
+            parseFloat((Math.random() * 900 + 10).toFixed(2)),
+            Math.floor(Math.random() * 200)
+        );
+    }
     prodStmt.finalize();
 
-    // Sample Customers
+    // 200 Customers
     const custStmt = db.prepare(`INSERT INTO Customers (Name, Contact, Address) VALUES (?, ?, ?)`);
-    custStmt.run('Alice Smith', '9876543210', '123 Main St');
-    custStmt.run('Bob Jones', '9876543211', '456 Oak Ave');
-    custStmt.run('Charlie Brown', '9876543212', '789 Pine Road');
+    for (let i = 1; i <= 200; i++) {
+        custStmt.run(`Customer ${i}`, `98765${i.toString().padStart(5, '0')}`, `${i} Main St`);
+    }
     custStmt.finalize();
 
-    // Sample Orders
+    // 200 Orders
     const ordStmt = db.prepare(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (?, ?, ?)`);
-    ordStmt.run(1, '2026-03-01', 500);
-    ordStmt.run(2, '2026-03-05', 1250);
-    ordStmt.run(3, '2026-03-10', 800);
-    ordStmt.run(1, '2026-03-15', 300);
-    ordStmt.run(2, '2026-03-20', 2100);
+    for (let i = 1; i <= 200; i++) {
+        const month = String(Math.floor(Math.random() * 12 + 1)).padStart(2, '0');
+        const day = String(Math.floor(Math.random() * 28 + 1)).padStart(2, '0');
+        ordStmt.run(
+            Math.floor(Math.random() * 200) + 1,
+            `2026-${month}-${day}`,
+            parseFloat((Math.random() * 4950 + 50).toFixed(2))
+        );
+    }
     ordStmt.finalize();
-    
-    // Sample Order Details
+
+    // 200 Order Details
     const odStmt = db.prepare(`INSERT INTO OrderDetails (OrderID, ProductID, Quantity, Price) VALUES (?, ?, ?, ?)`);
-    odStmt.run(1, 1, 10, 50);
-    odStmt.run(2, 3, 2, 450);
-    odStmt.run(2, 4, 1, 200);
-    odStmt.run(3, 2, 20, 40);
-    odStmt.run(4, 8, 2, 150);
+    for (let i = 1; i <= 200; i++) {
+        odStmt.run(
+            Math.floor(Math.random() * 200) + 1,
+            Math.floor(Math.random() * 200) + 1,
+            Math.floor(Math.random() * 20) + 1,
+            parseFloat((Math.random() * 900 + 10).toFixed(2))
+        );
+    }
     odStmt.finalize();
 
-    // Sample Deliveries
+    // 200 Deliveries
     const delStmt = db.prepare(`INSERT INTO Delivery (OrderID, DeliveryStatus, DeliveryDate) VALUES (?, ?, ?)`);
-    delStmt.run(1, 'Delivered', '2026-03-03');
-    delStmt.run(2, 'Delivered', '2026-03-07');
-    delStmt.run(3, 'Pending', '');
-    delStmt.run(4, 'Pending', '');
-    delStmt.run(5, 'Pending', '');
+    for (let i = 1; i <= 200; i++) {
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        const date = status === 'Delivered' ? `2026-03-${String(Math.floor(Math.random() * 28 + 1)).padStart(2, '0')}` : '';
+        delStmt.run(Math.floor(Math.random() * 200) + 1, status, date);
+    }
     delStmt.finalize();
 
-    // Sample Retailers
+    // 200 Retailers
     const retStmt = db.prepare(`INSERT INTO Retailer (RetailerName, Contact, Address) VALUES (?, ?, ?)`);
-    retStmt.run('City Supermart', '555-0192', 'Downtown Square');
-    retStmt.run('QuickMart', '555-1111', 'Uptown Blvd');
+    for (let i = 1; i <= 200; i++) {
+        retStmt.run(`Retailer ${i}`, `555-${i.toString().padStart(4, '0')}`, `Address ${i}`);
+    }
     retStmt.finalize();
 
     console.log('Database seeded and ready.');

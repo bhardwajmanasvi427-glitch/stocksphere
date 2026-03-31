@@ -12,7 +12,7 @@ function query(req, sql, params = []) {
 
 function runQuery(req, sql, params = []) {
     return new Promise((resolve, reject) => {
-        req.db.run(sql, params, function(err) {
+        req.db.run(sql, params, function (err) {
             if (err) reject(err);
             else resolve(this);
         });
@@ -79,7 +79,7 @@ router.get('/advanced-analysis', async (req, res) => {
             SELECT p.ProductName, SUM(od.Quantity) as q FROM OrderDetails od 
             JOIN Products p ON p.ProductID = od.ProductID 
             GROUP BY p.ProductID ORDER BY q DESC LIMIT 1`);
-        
+
         const worstProduct = await query(req, `
             SELECT p.ProductName, SUM(od.Quantity) as q FROM OrderDetails od 
             JOIN Products p ON p.ProductID = od.ProductID 
@@ -89,16 +89,16 @@ router.get('/advanced-analysis', async (req, res) => {
             SELECT c.Name, COUNT(o.OrderID) as oCount FROM Orders o 
             JOIN Customers c ON c.CustomerID = o.CustomerID 
             GROUP BY o.CustomerID ORDER BY oCount DESC LIMIT 1`);
-            
+
         const pendingDel = await query(req, 'SELECT COUNT(*) as count FROM Delivery WHERE DeliveryStatus = "Pending"');
 
         res.json({
             totalRevenue: totalRev,
             estimatedProfit: profit,
-            bestSellingProduct: bestProduct[0]? bestProduct[0].ProductName : 'N/A',
-            leastSellingProduct: worstProduct[0]? worstProduct[0].ProductName : 'N/A',
-            mostActiveCustomer: bestCtx[0]? bestCtx[0].Name : 'N/A',
-            pendingDeliveries: pendingDel[0]? pendingDel[0].count : 0
+            bestSellingProduct: bestProduct[0] ? bestProduct[0].ProductName : 'N/A',
+            leastSellingProduct: worstProduct[0] ? worstProduct[0].ProductName : 'N/A',
+            mostActiveCustomer: bestCtx[0] ? bestCtx[0].Name : 'N/A',
+            pendingDeliveries: pendingDel[0] ? pendingDel[0].count : 0
         });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -126,8 +126,17 @@ tables.forEach(table => {
                     JOIN Products p ON od.ProductID = p.ProductID 
                     WHERE od.OrderID = ?`, [req.params.id]);
                 res.json({ order: order[0], details });
-            } catch(e) { res.status(500).json({error: e.message}); }
+            } catch (e) { res.status(500).json({ error: e.message }); }
         });
+    }
+});
+
+router.get('/payments', async (req, res) => {
+    try {
+        const data = await query(req, 'SELECT * FROM Payment');
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
 });
 
