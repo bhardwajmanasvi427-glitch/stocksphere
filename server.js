@@ -5,7 +5,7 @@ const path = require('path');
 const session = require('express-session');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -36,7 +36,7 @@ app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 
 // ✅ ADD THIS HERE (BEFORE listen)
-app.get('/api/payments', (req, res) => {
+app.get('/api/payment', (req, res) => {
     db.all("SELECT * FROM Payment", [], (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
