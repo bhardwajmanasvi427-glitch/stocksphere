@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockSphere - Inventory & Analytics</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-view" class="view active">
+        <div class="login-container">
+            <div class="login-card">
+                <h1>StockSphere</h1>
+                <p>Welcome back! Please login to your account.</p>
+                <form id="login-form">
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" id="username" required placeholder="Enter username (admin, retailer, etc)">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="password" required placeholder="Enter password (e.g. admin123)">
+                    </div>
+                    <div class="input-group">
+                        <label>Role</label>
+                        <select id="role">
+                            <option value="admin">Admin</option>
+                            <option value="retailer">Retailer</option>
+                            <option value="wholesaler">Wholesaler</option>
+                        </select>
+                    </div>
+                    <div id="login-error" class="error-msg"></div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="app-view" class="view">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>StockSphere</h2>
+                <span class="role-badge" id="user-role-badge">Admin</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" data-target="dashboard" class="active">Dashboard</a>
+                <a href="#" data-target="products">Products</a>
+                <a href="#" data-target="orders">Orders</a>
+                <a href="#" data-target="customers">Customers</a>
+                <a href="#" data-target="suppliers">Suppliers</a>
+                <a href="#" data-target="payments">Payments</a>
+                <a href="#" data-target="delivery">Delivery</a>
+                <a href="#" data-target="retailer">Retailers</a>
+                <a href="#" data-target="wholesaler">Wholesalers</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn btn-danger btn-block">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <h1 id="page-title">Dashboard</h1>
+                <div class="user-profile">
+                    <span id="welcome-msg">Welcome, User</span>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                
+                <!-- Dashboard Content -->
+                <section id="dashboard" class="page active">
+                    <!-- Stats Row -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Products</h3>
+                            <div class="value" id="stat-products">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Orders</h3>
+                            <div class="value" id="stat-orders">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Revenue</h3>
+                            <div class="value" id="stat-revenue">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Customers</h3>
+                            <div class="value" id="stat-customers">-</div>
+                        </div>
+                        <div class="stat-card warning">
+                            <h3>Low Stock Alerts</h3>
+                            <div class="value" id="stat-low-stock">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Section -->
+                    <div class="charts-grid top-charts">
+                        <div class="chart-container">
+                            <h3>Sales Trend (Revenue over Time)</h3>
+                            <canvas id="salesTrendChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Top 5 Selling Products</h3>
+                            <canvas id="topSellingChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid bottom-charts">
+                         <div class="chart-container">
+                            <h3>Category-wise Revenue</h3>
+                            <canvas id="categorySalesChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Payment Methods</h3>
+                            <canvas id="paymentMethodChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Delivery Status</h3>
+                            <canvas id="deliveryStatusChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="chart-container full-width">
+                            <h3>Stock Levels</h3>
+                            <canvas id="stockLevelsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Analysis Panel -->
+                    <div class="advanced-analysis">
+                        <h3>Advanced Insights</h3>
+                        <div class="insights-grid" id="insights-container">
+                            Loading insights...
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Dynamic Data Table Section (Used for all CRUD pages) -->
+                <section id="data-page" class="page">
+                    <div class="toolbar">
+                        <input type="text" id="table-search" placeholder="Search records..." class="search-input">
+                        <!-- Removed Add New Button to simply rely on the populated DB for this version -->
+                    </div>
+                    <div class="table-container">
+                        <table id="data-table">
+                            <thead>
+                                <tr id="table-head"></tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <tr><td>Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
