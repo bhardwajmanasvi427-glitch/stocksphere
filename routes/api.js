@@ -79,12 +79,13 @@ router.get('/dashboard-stats', async (req, res) => {
     }
 });
 
-// 2. ANALYTICS (Graphs data) - Admin/Wholesaler
-router.get('/analytics', requireRole(['admin', 'wholesaler']), async (req, res) => {
+// 2. ANALYTICS (Graphs data) - Admin/Wholesaler/Retailer
+router.get('/analytics', requireRole(['admin', 'wholesaler', 'retailer']), async (req, res) => {
     try {
         const role = req.session.user.role;
         
         let salesTrend = [], topSelling = [], categorySales = [], paymentMethods = [], deliveryStatus = [], stockLevels = [];
+        let spendingTrend = [], topPurchases = [];
         
         if (role === 'admin' || role === 'wholesaler') {
             salesTrend = await query(req, 'SELECT OrderDate, SUM(TotalAmount) as Total FROM Orders GROUP BY OrderDate ORDER BY OrderDate');
@@ -94,11 +95,16 @@ router.get('/analytics', requireRole(['admin', 'wholesaler']), async (req, res) 
             stockLevels = await query(req, 'SELECT ProductName, StockQuantity FROM Products LIMIT 10');
         }
         
+        if (role === 'retailer') {
+            spendingTrend = await query(req, 'SELECT OrderDate, SUM(TotalAmount) as Total FROM Orders WHERE CustomerID = ? GROUP BY OrderDate ORDER BY OrderDate', [RETAILER_MOCK_ID]);
+            topPurchases = await query(req, `SELECT p.ProductName, SUM(od.Quantity) as TotalSold FROM OrderDetails od JOIN Products p ON od.ProductID = p.ProductID JOIN Orders o ON o.OrderID = od.OrderID WHERE o.CustomerID = ? GROUP BY p.ProductID ORDER BY TotalSold DESC LIMIT 5`, [RETAILER_MOCK_ID]);
+        }
+
         if (role === 'admin') {
              paymentMethods = await query(req, 'SELECT PaymentMethod, COUNT(*) as count FROM Payment GROUP BY PaymentMethod');
         }
 
-        res.json({ salesTrend, topSelling, categorySales, paymentMethods, deliveryStatus, stockLevels });
+        res.json({ salesTrend, topSelling, categorySales, paymentMethods, deliveryStatus, stockLevels, spendingTrend, topPurchases, role });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

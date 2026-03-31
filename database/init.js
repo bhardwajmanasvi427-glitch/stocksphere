@@ -63,6 +63,28 @@ db.serialize(() => {
     loadExcel('StockSphere_Retailer_Wholesaler.xlsx', 'Wholesaler', 'Wholesaler', ['WholesalerID', 'WholesalerName', 'Contact', 'Address', 'GSTNumber'], r => [r.WholesalerID, r.WholesalerName, r.Contact, r.Address, r.GSTNumber]);
     loadExcel('StockSphere_Retailer_Wholesaler.xlsx', 'Retailer', 'Retailer', ['RetailerID', 'RetailerName', 'Contact', 'Address'], r => [r.RetailerID, r.RetailerName, r.Contact, r.Address]);
 
-    console.log('Database seeded and ready.');
+    // Guarantee that the Retailer persona (CustomerID = 1) has beautiful historical records for charting
+    db.run(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (1, '2026-03-01', 1200.50)`);
+    db.run(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (1, '2026-03-02', 805.00)`);
+    db.run(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (1, '2026-03-12', 450.25)`);
+    db.run(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (1, '2026-03-15', 3400.00)`);
+    db.run(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (1, '2026-03-22', 1700.75)`);
+    db.run(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (1, '2026-03-28', 890.00)`);
+    
+    // Inject detail links dynamically using last orders logic
+    db.run(`INSERT INTO OrderDetails (OrderID, ProductID, Quantity, Price) 
+            SELECT OrderID, 1, 5, 240.10 FROM Orders WHERE CustomerID = 1 AND OrderDate = '2026-03-01'`);
+    db.run(`INSERT INTO OrderDetails (OrderID, ProductID, Quantity, Price) 
+            SELECT OrderID, 2, 8, 100.62 FROM Orders WHERE CustomerID = 1 AND OrderDate = '2026-03-02'`);
+    db.run(`INSERT INTO OrderDetails (OrderID, ProductID, Quantity, Price) 
+            SELECT OrderID, 5, 10, 45.02 FROM Orders WHERE CustomerID = 1 AND OrderDate = '2026-03-12'`);
+    db.run(`INSERT INTO OrderDetails (OrderID, ProductID, Quantity, Price) 
+            SELECT OrderID, 3, 20, 170.00 FROM Orders WHERE CustomerID = 1 AND OrderDate = '2026-03-15'`);
+    db.run(`INSERT INTO OrderDetails (OrderID, ProductID, Quantity, Price) 
+            SELECT OrderID, 6, 12, 141.72 FROM Orders WHERE CustomerID = 1 AND OrderDate = '2026-03-22'`);
+    db.run(`INSERT INTO OrderDetails (OrderID, ProductID, Quantity, Price) 
+            SELECT OrderID, 1, 3, 296.66 FROM Orders WHERE CustomerID = 1 AND OrderDate = '2026-03-28'`);
+
+    setTimeout(() => { console.log('Database seeded and ready.'); }, 500);
 });
 db.close();

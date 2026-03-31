@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('ret-orders').innerText = stats.orders;
                 document.getElementById('ret-spent').innerText = UI.formatCurrency(stats.spent);
                 document.getElementById('ret-available').innerText = stats.availableProducts;
+                Charts.renderDashboardCharts();
             } else if (currentUser.role === 'wholesaler') {
                 document.getElementById('wh-deliveries').innerText = stats.totalDeliveries;
                 document.getElementById('wh-pending').innerText = stats.pendingDeliveries;

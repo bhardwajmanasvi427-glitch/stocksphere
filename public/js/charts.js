@@ -8,6 +8,21 @@ const Charts = {
             Chart.defaults.color = '#94A3B8';
             Chart.defaults.font.family = 'Inter';
 
+            if (data.role === 'retailer') {
+                this.createLineChart('retSpendingChart', 
+                    data.spendingTrend.map(d => d.OrderDate), 
+                    data.spendingTrend.map(d => d.Total), 
+                    'Spent (₹)', '#3B82F6'
+                );
+
+                this.createBarChart('retTopPurchasesChart', 
+                    data.topPurchases.map(d => d.ProductName), 
+                    data.topPurchases.map(d => d.TotalSold), 
+                    'Total Sold', '#4F46E5'
+                );
+                return;
+            }
+
             // 1. Sales Trend
             this.createLineChart('salesTrendChart', 
                 data.salesTrend.map(d => d.OrderDate), 
@@ -30,11 +45,13 @@ const Charts = {
             );
 
             // 4. Payment Methods (Pie)
-            this.createDoughnutChart('paymentMethodChart',
-                data.paymentMethods.map(d => d.PaymentMethod),
-                data.paymentMethods.map(d => d.count),
-                ['#10B981', '#3B82F6', '#F59E0B']
-            );
+            if (data.role === 'admin') {
+                this.createDoughnutChart('paymentMethodChart',
+                    data.paymentMethods.map(d => d.PaymentMethod),
+                    data.paymentMethods.map(d => d.count),
+                    ['#10B981', '#3B82F6', '#F59E0B']
+                );
+            }
 
             // 5. Delivery Status (Bar)
             this.createBarChart('deliveryStatusChart',
