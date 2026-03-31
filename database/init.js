@@ -50,15 +50,22 @@ db.serialize(() => {
         } catch (e) { console.error('Error loading excel', filename, sheetName, e); }
     }
 
+    function excelDateToJSDate(serial) {
+        if (!serial || isNaN(serial)) return serial; // If it's empty or already a string
+        // Excel serial counts days from 1900. Offset to UNIX epoch (1970) is 25569 days.
+        const unixTimestamp = (serial - 25569) * 86400 * 1000;
+        return new Date(unixTimestamp).toISOString().split('T')[0];
+    }
+
     // Load ALL exact Excel Data
     loadExcel('StockSphere_200Rows (1).xlsx', 'Suppliers', 'Suppliers', ['SupplierID', 'SupplierName', 'Contact', 'Email', 'Address'], r => [r.SupplierID, r.SupplierName, r.Contact, r.Email, r.Address]);
     loadExcel('StockSphere_200Rows (1).xlsx', 'Products', 'Products', ['ProductID', 'ProductName', 'Category', 'Price', 'StockQuantity'], r => [r.ProductID, r.ProductName, r.Category, r.Price, r.Stock]);
     loadExcel('StockSphere_200Rows (1).xlsx', 'Customers', 'Customers', ['CustomerID', 'Name', 'Contact', 'Address'], r => [r.CustomerID, r.CustomerName, r.Phone, r.Address]);
-    loadExcel('StockSphere_200Rows (1).xlsx', 'Orders', 'Orders', ['OrderID', 'CustomerID', 'OrderDate', 'TotalAmount'], r => [r.OrderID, r.CustomerID, r.OrderDate, r.TotalAmount]);
+    loadExcel('StockSphere_200Rows (1).xlsx', 'Orders', 'Orders', ['OrderID', 'CustomerID', 'OrderDate', 'TotalAmount'], r => [r.OrderID, r.CustomerID, excelDateToJSDate(r.OrderDate), r.TotalAmount]);
     loadExcel('StockSphere_200Rows (1).xlsx', 'OrderDetails', 'OrderDetails', ['OrderDetailID', 'OrderID', 'ProductID', 'Quantity', 'Price'], r => [r.OrderDetailID, r.OrderID, r.ProductID, r.Quantity, r.Price]);
 
     loadExcel('StockSphere_Payment_Delivery_FIXED.xlsx', 'Payment', 'Payment', ['PaymentID', 'OrderID', 'PaymentMethod', 'PaymentStatus'], r => [r.PaymentID, r.OrderID, r.PaymentMethod, r.PaymentStatus]);
-    loadExcel('StockSphere_Payment_Delivery_FIXED.xlsx', 'Delivery', 'Delivery', ['DeliveryID', 'OrderID', 'DeliveryStatus', 'DeliveryDate'], r => [r.DeliveryID, r.OrderID, r.DeliveryStatus, r.DeliveryDate]);
+    loadExcel('StockSphere_Payment_Delivery_FIXED.xlsx', 'Delivery', 'Delivery', ['DeliveryID', 'OrderID', 'DeliveryStatus', 'DeliveryDate'], r => [r.DeliveryID, r.OrderID, r.DeliveryStatus, excelDateToJSDate(r.DeliveryDate)]);
 
     loadExcel('StockSphere_Retailer_Wholesaler.xlsx', 'Wholesaler', 'Wholesaler', ['WholesalerID', 'WholesalerName', 'Contact', 'Address', 'GSTNumber'], r => [r.WholesalerID, r.WholesalerName, r.Contact, r.Address, r.GSTNumber]);
     loadExcel('StockSphere_Retailer_Wholesaler.xlsx', 'Retailer', 'Retailer', ['RetailerID', 'RetailerName', 'Contact', 'Address'], r => [r.RetailerID, r.RetailerName, r.Contact, r.Address]);
