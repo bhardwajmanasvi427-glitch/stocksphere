@@ -220,9 +220,9 @@ router.get('/export/:type/:timeframe', requireRole(['admin', 'wholesaler', 'reta
         const role = req.session.user.role;
         let dateCondition = "";
         
-        if (timeframe === 'daily') dateCondition = "AND OrderDate >= date('now', '-1 day')";
-        else if (timeframe === 'weekly') dateCondition = "AND OrderDate >= date('now', '-7 days')";
-        else if (timeframe === 'monthly') dateCondition = "AND OrderDate >= date('now', '-1 month')";
+        if (timeframe === 'daily') dateCondition = "AND OrderDate >= date((SELECT MAX(OrderDate) FROM Orders), '-1 day')";
+        else if (timeframe === 'weekly') dateCondition = "AND OrderDate >= date((SELECT MAX(OrderDate) FROM Orders), '-7 days')";
+        else if (timeframe === 'monthly') dateCondition = "AND OrderDate >= date((SELECT MAX(OrderDate) FROM Orders), '-1 month')";
 
         let data = [];
         if (type === 'sales') {
