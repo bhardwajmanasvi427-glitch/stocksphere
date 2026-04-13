@@ -80,6 +80,21 @@
                 <!-- Dashboard Content -->
                 <section id="dashboard" class="page active">
                     
+                    <!-- Dashboard Exports -->
+                    <div class="export-controls" style="margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center; background: var(--dark-card); padding: 1rem; border-radius: 0.75rem; border: 1px solid var(--border);">
+                        <h4 style="color: var(--text-muted); margin-right: 1rem;">Export Reports</h4>
+                        <select id="exportType" class="status-select">
+                            <option value="sales">Sales & Revenue</option>
+                            <option value="stock">Current Stock Levels</option>
+                        </select>
+                        <select id="exportTimeframe" class="status-select">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                        <button class="btn btn-success" onclick="UI.exportReport()">📥 Download CSV Export</button>
+                    </div>
+
                     <!-- ADMIN STATS -->
                     <div class="stats-grid dashboard-admin">
                         <div class="stat-card">
@@ -195,7 +210,8 @@
                 <!-- Dynamic Data Table Section (Used for all CRUD pages) -->
                 <section id="data-page" class="page">
                     <div class="toolbar">
-                        <input type="text" id="table-search" placeholder="Search records..." class="search-input">
+                        <input type="text" id="table-search" placeholder="Search records..." class="search-input" onkeyup="UI.filterTable(this.value)">
+                        <button class="btn btn-primary role-admin" onclick="UI.showCrudModal()">+ Add Record</button>
                         <!-- Add Action Buttons that show up dynamically -->
                         <div id="action-area"></div>
                     </div>
@@ -215,6 +231,24 @@
 
             </div>
         </main>
+    </div>
+
+    <!-- Global CRUD Modal -->
+    <div id="crudModal" class="modal view" style="position: fixed; inset: 0; background: rgba(3, 8, 15, 0.85); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center;">
+        <div class="login-card" style="width: 500px; max-height: 85vh; overflow-y: auto;">
+            <h2 id="modalTitle" style="color: white; margin-bottom: 1.5rem; font-family: 'Playfair Display', serif;">Add Record</h2>
+            <form id="crudForm" onsubmit="UI.submitCrudForm(event)">
+                <input type="hidden" id="modalTable">
+                <input type="hidden" id="modalAction">
+                <input type="hidden" id="modalIdField">
+                <input type="hidden" id="modalIdValue">
+                <div id="modalFields"></div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary btn-block" style="flex: 1;">Save Changes</button>
+                    <button type="button" class="btn btn-danger btn-block" style="flex: 1;" onclick="document.getElementById('crudModal').classList.remove('active')">Cancel</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="/js/api.js"></script>

@@ -205,11 +205,84 @@ otherTables.forEach(table => {
     });
 });
 // Special plural map for payment for the user's previously added route
+// Special plural map for payment for the user's previously added route
 router.get('/payment', async (req, res) => {
     try {
         const data = await query(req, 'SELECT * FROM Payment');
         res.json(data);
     } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 5. EXPORT ENDPOINT
+router.get('/export/:type/:timeframe', requireRole(['admin', 'wholesaler', 'retailer']), async (req, res) => {
+    try {
+        const { type, timeframe } = req.params;
+        const role = req.session.user.role;
+        let dateCondition = "";
+        
+        if (timeframe === 'daily') dateCondition = "AND OrderDate >= date('now', '-1 day')";
+        else if (timeframe === 'weekly') dateCondition = "AND OrderDate >= date('now', '-7 days')";
+        else if (timeframe === 'monthly') dateCondition = "AND OrderDate >= date('now', '-1 month')";
+
+        let data = [];
+        if (type === 'sales') {
+            let userCondition = role === 'retailer' ? `AND CustomerID = ${RETAILER_MOCK_ID}` : "";
+            data = await query(req, `SELECT * FROM Orders WHERE 1=1 ${userCondition} ${dateCondition}`);
+        } else if (type === 'stock') {
+            data = await query(req, `SELECT * FROM Products`);
+        }
+
+        if (data.length === 0) {
+            return res.status(404).send("No data found for export.");
+        }
+
+        const keys = Object.keys(data[0]);
+        let csv = keys.join(',') + '\n';
+        data.forEach(row => {
+            csv += keys.map(k => {
+                let v = row[k] === null ? '' : String(row[k]);
+                v = v.replace(/"/g, '""');
+                return `"${v}"`;
+            }).join(',') + '\n';
+        });
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${type}_report_${timeframe}.csv"`);
+        res.send(csv);
+    } catch(e) {
+        res.status(500).json({error: e.message});
+    }
+});
+
+// 6. GENERIC CRUD (Admin only)
+router.post('/generic/:table', requireRole(['admin']), async (req, res) => {
+    try {
+        const { table } = req.params;
+        const fields = Object.keys(req.body);
+        const values = Object.values(req.body);
+        const placeholders = fields.map(() => '?').join(',');
+        await runQuery(req, `INSERT INTO ${table} (${fields.join(',')}) VALUES (${placeholders})`, values);
+        res.json({ success: true, message: 'Record added successfully' });
+    } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+router.put('/generic/:table/:idField/:idValue', requireRole(['admin']), async (req, res) => {
+    try {
+        const { table, idField, idValue } = req.params;
+        const fields = Object.keys(req.body);
+        const values = Object.values(req.body);
+        const updates = fields.map(f => `${f} = ?`).join(',');
+        await runQuery(req, `UPDATE ${table} SET ${updates} WHERE ${idField} = ?`, [...values, idValue]);
+        res.json({ success: true, message: 'Record updated successfully' });
+    } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+router.delete('/generic/:table/:idField/:idValue', requireRole(['admin']), async (req, res) => {
+    try {
+        const { table, idField, idValue } = req.params;
+        await runQuery(req, `DELETE FROM ${table} WHERE ${idField} = ?`, [idValue]);
+        res.json({ success: true, message: 'Record deleted successfully' });
+    } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;
