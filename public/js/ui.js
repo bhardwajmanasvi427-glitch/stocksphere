@@ -1,5 +1,13 @@
 const UI = {
-    renderTable(headers, data, role, endpoint) {
+    currentSort: { column: null, direction: 1 },
+    lastTableData: [],
+    
+    renderTable(headers, data, role, endpoint, isSorting = false) {
+        if (!isSorting) {
+            this.lastTableData = [...data];
+            this.currentSort = { column: null, direction: 1 };
+        }
+        
         const headRow = document.getElementById('table-head');
         const body = document.getElementById('table-body');
         
@@ -21,6 +29,38 @@ const UI = {
         headers.forEach(h => {
             const th = document.createElement('th');
             th.textContent = h;
+            
+            if (this.currentSort.column === h) {
+                th.textContent += this.currentSort.direction === 1 ? ' ▲' : ' ▼';
+            }
+            
+            th.style.cursor = 'pointer';
+            th.style.userSelect = 'none';
+            th.title = "Click to sort";
+            th.onclick = () => {
+                if (this.currentSort.column === h) {
+                    this.currentSort.direction *= -1;
+                } else {
+                    this.currentSort.column = h;
+                    this.currentSort.direction = 1;
+                }
+                
+                this.lastTableData.sort((a, b) => {
+                    let valA = a[h];
+                    let valB = b[h];
+                    
+                    // Attempt numeric compare first (e.g., Prices, IDs)
+                    if (!isNaN(valA) && !isNaN(valB) && valA !== null && valB !== null && valA !== "" && valB !== "") {
+                        return (Number(valA) - Number(valB)) * this.currentSort.direction;
+                    }
+                    // Fallback string locale compare
+                    return String(valA || "").localeCompare(String(valB || "")) * this.currentSort.direction;
+                });
+                
+                // Re-render efficiently preserving the sort state flag
+                this.renderTable(headers, this.lastTableData, role, endpoint, true);
+            };
+            
             headRow.appendChild(th);
         });
         if (hasActions) {
