@@ -1,10 +1,16 @@
 const UI = {
     currentSort: { column: null, direction: 1 },
     lastTableData: [],
+    lastHeaders: [],
+    lastRole: '',
+    lastEndpoint: '',
     
     renderTable(headers, data, role, endpoint, isSorting = false) {
         if (!isSorting) {
             this.lastTableData = [...data];
+            this.lastHeaders = headers;
+            this.lastRole = role;
+            this.lastEndpoint = endpoint;
             this.currentSort = { column: null, direction: 1 };
         }
         
@@ -23,6 +29,21 @@ const UI = {
         let hasActions = false;
         if ((role === 'retailer' && endpoint === 'products') || (role === 'wholesaler' && endpoint === 'delivery') || role === 'admin') {
             hasActions = true;
+        }
+
+        // Populate filter sort dropdown dynamically based on available table headers
+        const sortDrop = document.getElementById('sort-column');
+        if (!isSorting) {
+            sortDrop.innerHTML = '<option value="">Sort by...</option>';
+            headers.forEach(h => {
+                const opt = document.createElement('option');
+                opt.value = h;
+                opt.textContent = h;
+                sortDrop.appendChild(opt);
+            });
+            // reset UI state to default
+            sortDrop.value = "";
+            document.getElementById('sort-direction').value = "1";
         }
 
         // Setup headers
@@ -44,21 +65,9 @@ const UI = {
                     this.currentSort.column = h;
                     this.currentSort.direction = 1;
                 }
-                
-                this.lastTableData.sort((a, b) => {
-                    let valA = a[h];
-                    let valB = b[h];
-                    
-                    // Attempt numeric compare first (e.g., Prices, IDs)
-                    if (!isNaN(valA) && !isNaN(valB) && valA !== null && valB !== null && valA !== "" && valB !== "") {
-                        return (Number(valA) - Number(valB)) * this.currentSort.direction;
-                    }
-                    // Fallback string locale compare
-                    return String(valA || "").localeCompare(String(valB || "")) * this.currentSort.direction;
-                });
-                
-                // Re-render efficiently preserving the sort state flag
-                this.renderTable(headers, this.lastTableData, role, endpoint, true);
+                document.getElementById('sort-column').value = this.currentSort.column;
+                document.getElementById('sort-direction').value = this.currentSort.direction;
+                UI.triggerSort();
             };
             
             headRow.appendChild(th);
@@ -127,6 +136,27 @@ const UI = {
 
             body.appendChild(tr);
         });
+    },
+
+    triggerSort() {
+        const col = document.getElementById('sort-column').value;
+        const dir = parseInt(document.getElementById('sort-direction').value);
+        if(!col) return;
+        
+        this.currentSort.column = col;
+        this.currentSort.direction = dir;
+        
+        this.lastTableData.sort((a, b) => {
+            let valA = a[col];
+            let valB = b[col];
+            
+            if (!isNaN(valA) && !isNaN(valB) && valA !== null && valB !== null && valA !== "" && valB !== "") {
+                return (Number(valA) - Number(valB)) * dir;
+            }
+            return String(valA || "").localeCompare(String(valB || "")) * dir;
+        });
+        
+        this.renderTable(this.lastHeaders, this.lastTableData, this.lastRole, this.lastEndpoint, true);
     },
 
     async placeOrder(productID, basePrice, quantity) {

@@ -209,8 +209,19 @@
 
                 <!-- Dynamic Data Table Section (Used for all CRUD pages) -->
                 <section id="data-page" class="page">
-                    <div class="toolbar">
-                        <input type="text" id="table-search" placeholder="Search records..." class="search-input" onkeyup="UI.filterTable(this.value)">
+                    <div class="toolbar" style="gap: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="table-search" placeholder="Search records..." class="search-input" onkeyup="UI.filterTable(this.value)" style="flex: 1;">
+                        
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <select id="sort-column" class="status-select" onchange="UI.triggerSort()" style="margin-bottom:0;">
+                                <option value="">Sort by...</option>
+                            </select>
+                            <select id="sort-direction" class="status-select" onchange="UI.triggerSort()" style="margin-bottom:0;">
+                                <option value="1">Ascending</option>
+                                <option value="-1">Descending</option>
+                            </select>
+                        </div>
+                        
                         <button class="btn btn-primary role-admin" onclick="UI.showCrudModal()">+ Add Record</button>
                         <!-- Add Action Buttons that show up dynamically -->
                         <div id="action-area"></div>
