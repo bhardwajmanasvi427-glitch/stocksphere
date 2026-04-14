@@ -162,8 +162,6 @@ const UI = {
     async placeOrder(productID, basePrice, quantity) {
         if(!confirm('Place order for ' + quantity + ' units?')) return;
         try {
-            const res = await API.get(''); // just to ensure api resolves relative
-            // better way
             const rr = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
