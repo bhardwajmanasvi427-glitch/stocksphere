@@ -77,7 +77,7 @@ db.serialize(() => {
     db.run(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (1, '2026-03-15', 3400.00)`);
     db.run(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (1, '2026-03-22', 1700.75)`);
     db.run(`INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (1, '2026-03-28', 890.00)`);
-    
+
     // Inject detail links dynamically using last orders logic
     db.run(`INSERT INTO OrderDetails (OrderID, ProductID, Quantity, Price) 
             SELECT OrderID, 1, 5, 240.10 FROM Orders WHERE CustomerID = 1 AND OrderDate = '2026-03-01'`);
