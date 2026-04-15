@@ -35,7 +35,6 @@ const apiRoutes = require('./routes/api');
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 
-// ✅ ADD THIS HERE (BEFORE listen)
 app.get('/api/payment', (req, res) => {
     db.all("SELECT * FROM Payment", [], (err, rows) => {
         if (err) {
@@ -45,7 +44,6 @@ app.get('/api/payment', (req, res) => {
     });
 });
 
-// ✅ THEN START SERVER
 app.listen(PORT, () => {
     console.log(`StockSphere Server running on http://localhost:${PORT}`);
 });
