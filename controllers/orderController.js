@@ -23,10 +23,10 @@ const checkAndAutoOrder = async (db, productId) => {
         if (productData.length === 0) return;
         
         const product = productData[0];
-        if (product.StockQuantity < 10) {
-            console.log(`Low stock detected for ${product.ProductName}. Placing auto-order...`);
+        if (product.StockQuantity < 50) {
+            console.log(`[SYSTEM] Low stock detected for ${product.ProductName} (${product.StockQuantity}). Placing auto-order...`);
             
-            const restockQty = 50;
+            const restockQty = 100;
             const totalAmount = restockQty * product.Price;
             const orderDate = new Date().toISOString().split('T')[0];
             
