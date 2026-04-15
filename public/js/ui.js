@@ -370,7 +370,7 @@ const UI = {
                 <tr>
                     <td>${o.ProductName}</td>
                     <td style="color:#EF4444">${o.CurrentStock}</td>
-                    <td><span class="role-badge" style="background:#10B981"> Restocked (50) </span></td>
+                    <td><span class="role-badge" style="background:#10B981"> Restocked (100) </span></td>
                     <td>${o.OrderDate}</td>
                 </tr>
             `).join('');
