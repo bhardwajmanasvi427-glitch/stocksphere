@@ -116,6 +116,15 @@ const UI = {
                     td.appendChild(select);
                 }
                 else if (role === 'admin') {
+                    if (endpoint === 'orders') {
+                        const billBtn = document.createElement('button');
+                        billBtn.className = 'btn btn-small btn-success';
+                        billBtn.style.marginRight = '5px';
+                        billBtn.textContent = '📄 Bill';
+                        billBtn.onclick = () => UI.downloadBill(row.OrderID);
+                        td.appendChild(billBtn);
+                    }
+
                     const editBtn = document.createElement('button');
                     editBtn.className = 'btn btn-small btn-primary';
                     editBtn.style.marginRight = '5px';
@@ -302,5 +311,62 @@ const UI = {
         const type = document.getElementById('exportType').value;
         const timeframe = document.getElementById('exportTimeframe').value;
         window.open(`/api/export/${type}/${timeframe}`, '_blank');
+    },
+
+    async fetchProfitReport() {
+        const start = document.getElementById('ana-start-date').value;
+        const end = document.getElementById('ana-end-date').value;
+        if (!start || !end) return alert('Select both start and end dates');
+
+        try {
+            const res = await fetch(`/api/analytics/report?startDate=${start}&endDate=${end}`);
+            const data = await res.json();
+            if(!res.ok) throw new Error(data.error);
+
+            const container = document.getElementById('analytics-report-result');
+            container.style.display = 'grid';
+            container.innerHTML = `
+                <div class="insight-item"><span>Total Revenue</span><strong>${this.formatCurrency(data.revenue)}</strong></div>
+                <div class="insight-item"><span>Total Expenses</span><strong style="color: #EF4444">${this.formatCurrency(data.expenses)}</strong></div>
+                <div class="insight-item"><span>Net Profit</span><strong style="color: #10B981">${this.formatCurrency(data.profit)}</strong></div>
+                <div class="insight-item"><span>Sales Count</span><strong>${data.salesCount}</strong></div>
+            `;
+        } catch(e) { alert('Report Error: ' + e.message); }
+    },
+
+    async downloadBill(orderId) {
+        try {
+            const response = await fetch(`/api/generate-bill/${orderId}`, { method: 'POST' });
+            if (!response.ok) throw new Error('Could not generate bill');
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bill_${orderId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch(e) { alert(e.message); }
+    },
+
+    async loadAutoOrders() {
+        try {
+            const res = await fetch('/api/auto-orders');
+            const data = await res.json();
+            const body = document.getElementById('auto-order-list');
+            if (data.length === 0) {
+                body.innerHTML = '<tr><td colspan="4">No auto-orders placed yet.</td></tr>';
+                return;
+            }
+            body.innerHTML = data.map(o => `
+                <tr>
+                    <td>${o.ProductName}</td>
+                    <td style="color:#EF4444">${o.CurrentStock}</td>
+                    <td><span class="role-badge" style="background:#10B981"> Restocked (50) </span></td>
+                    <td>${o.OrderDate}</td>
+                </tr>
+            `).join('');
+        } catch(e) { console.error('Auto-order list error', e); }
     }
 };
+

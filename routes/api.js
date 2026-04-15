@@ -1,6 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
+// Controllers
+const analyticsCtrl = require('../controllers/analyticsController');
+const expenseCtrl = require('../controllers/expenseController');
+const paymentCtrl = require('../controllers/paymentController');
+const orderCtrl = require('../controllers/orderController');
+const billCtrl = require('../controllers/billController');
+
+
 function query(req, sql, params = []) {
     return new Promise((resolve, reject) => {
         req.db.all(sql, params, (err, rows) => {
@@ -110,6 +118,10 @@ router.get('/analytics', requireRole(['admin', 'wholesaler', 'retailer']), async
     }
 });
 
+// FEATURE 1: PROFIT & REVENUE ANALYTICS REPORT
+router.get('/analytics/report', requireRole(['admin']), analyticsCtrl.getAnalytics);
+
+
 // 3. ADVANCED ANALYSIS (Admin only)
 router.get('/advanced-analysis', requireRole(['admin']), async (req, res) => {
     try {
@@ -134,34 +146,27 @@ router.get('/advanced-analysis', requireRole(['admin']), async (req, res) => {
     }
 });
 
+// FEATURE 2: EXPENSE MANAGEMENT
+router.get('/expenses', requireRole(['admin']), expenseCtrl.getExpenses);
+router.post('/expenses', requireRole(['admin']), expenseCtrl.addExpense);
+
+// FEATURE 3: BILL GENERATION (PDF)
+router.post('/generate-bill/:orderId', requireRole(['admin', 'retailer', 'wholesaler']), billCtrl.generateBill);
+
+// FEATURE 4: PAYMENTS SECTION
+router.get('/payments/:retailerId', requireRole(['admin', 'retailer']), paymentCtrl.getPaymentsByRetailer);
+router.get('/payments', requireRole(['admin']), paymentCtrl.getAllPayments);
+
+// FEATURE 5: AUTO STOCK MANAGEMENT (VISIBILITY)
+router.get('/auto-orders', requireRole(['admin']), orderCtrl.getAutoOrders);
+
+
 
 // 4. ACTION ENDPOINTS
 
-// Retailer placing order
-router.post('/orders', requireRole(['admin', 'retailer']), async (req, res) => {
-    try {
-        const { productID, quantity, price } = req.body;
-        const total = quantity * price;
-        const customerId = req.session.user.role === 'admin' ? 1 : RETAILER_MOCK_ID; 
+// Retailer placing order (Now handles auto-stock)
+router.post('/orders', requireRole(['admin', 'retailer']), orderCtrl.placeOrder);
 
-        const orderDate = new Date().toISOString().split('T')[0];
-        
-        // Insert order
-        const insertOrder = await runQuery(req, `INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (?, ?, ?)`, [customerId, orderDate, total]);
-        const orderId = insertOrder.lastID;
-
-        // Insert OD
-        await runQuery(req, `INSERT INTO OrderDetails (OrderID, ProductID, Quantity, Price) VALUES (?, ?, ?, ?)`, [orderId, productID, quantity, price]);
-        
-        // Reduce stock
-        await runQuery(req, `UPDATE Products SET StockQuantity = StockQuantity - ? WHERE ProductID = ?`, [quantity, productID]);
-
-        // Add pending delivery
-        await runQuery(req, `INSERT INTO Delivery (OrderID, DeliveryStatus, DeliveryDate) VALUES (?, 'Pending', '')`, [orderId]);
-
-        res.json({ success: true, message: 'Order created successfully!' });
-    } catch(e) { res.status(500).json({ error: e.message }); }
-});
 
 // Wholesaler updating delivery
 router.put('/delivery/:id', requireRole(['admin', 'wholesaler']), async (req, res) => {

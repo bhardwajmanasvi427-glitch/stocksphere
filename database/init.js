@@ -10,7 +10,7 @@ console.log('Initializing database at:', dbPath);
 
 db.serialize(() => {
     // Drop existing
-    const tables = ['Admin', 'Products', 'Suppliers', 'Customers', 'Orders', 'OrderDetails', 'Payment', 'Delivery', 'Retailer', 'Wholesaler'];
+    const tables = ['Admin', 'Products', 'Suppliers', 'Customers', 'Orders', 'OrderDetails', 'Payment', 'Delivery', 'Retailer', 'Wholesaler', 'Expenses', 'Payments'];
     tables.forEach(t => db.run(`DROP TABLE IF EXISTS ${t}`));
 
     // CREATE TABLES
@@ -18,12 +18,14 @@ db.serialize(() => {
     db.run(`CREATE TABLE Products (ProductID INTEGER PRIMARY KEY AUTOINCREMENT, ProductName TEXT, Category TEXT, Price REAL, StockQuantity INTEGER)`);
     db.run(`CREATE TABLE Suppliers (SupplierID INTEGER PRIMARY KEY, SupplierName TEXT, Contact TEXT, Email TEXT, Address TEXT)`);
     db.run(`CREATE TABLE Customers (CustomerID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Contact TEXT, Address TEXT)`);
-    db.run(`CREATE TABLE Orders (OrderID INTEGER PRIMARY KEY AUTOINCREMENT, CustomerID INTEGER, OrderDate TEXT, TotalAmount REAL)`);
+    db.run(`CREATE TABLE Orders (OrderID INTEGER PRIMARY KEY AUTOINCREMENT, CustomerID INTEGER, OrderDate TEXT, TotalAmount REAL, isAutoOrder INTEGER DEFAULT 0)`);
     db.run(`CREATE TABLE OrderDetails (OrderDetailID INTEGER PRIMARY KEY AUTOINCREMENT, OrderID INTEGER, ProductID INTEGER, Quantity INTEGER, Price REAL)`);
     db.run(`CREATE TABLE Payment (PaymentID INTEGER PRIMARY KEY, OrderID INTEGER, PaymentMethod TEXT, PaymentStatus TEXT)`);
     db.run(`CREATE TABLE Delivery (DeliveryID INTEGER PRIMARY KEY AUTOINCREMENT, OrderID INTEGER, DeliveryStatus TEXT, DeliveryDate TEXT)`);
     db.run(`CREATE TABLE Retailer (RetailerID INTEGER PRIMARY KEY AUTOINCREMENT, RetailerName TEXT, Contact TEXT, Address TEXT)`);
     db.run(`CREATE TABLE Wholesaler (WholesalerID INTEGER PRIMARY KEY, WholesalerName TEXT, Contact TEXT, Address TEXT, GSTNumber TEXT)`);
+    db.run(`CREATE TABLE Expenses (id INTEGER PRIMARY KEY AUTOINCREMENT, amount REAL, description TEXT, date TEXT)`);
+    db.run(`CREATE TABLE Payments (id INTEGER PRIMARY KEY AUTOINCREMENT, retailerId INTEGER, amount REAL, status TEXT, date TEXT)`);
 
     // Insert Default admin user
     db.run(`INSERT INTO Admin (Name, Password) VALUES ('admin', 'admin123')`);

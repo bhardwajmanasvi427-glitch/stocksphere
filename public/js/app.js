@@ -122,6 +122,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('wh-products').innerText = stats.totalProducts;
                 Charts.renderDashboardCharts();
             }
+
+            if (currentUser.role === 'admin') {
+                UI.loadAutoOrders();
+            }
         } catch(e) { console.error('Error loading dashboard', e); }
     }
 
@@ -132,7 +136,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('table-search').value = '';
 
         try {
-            const data = await API.get(endpoint);
+            let actualEndpoint = endpoint;
+            if (endpoint === 'payments' && currentUser.role === 'retailer') {
+                 actualEndpoint = 'payments/1'; // Using RETAILER_MOCK_ID = 1
+            }
+
+            const data = await API.get(actualEndpoint);
             if (data && data.length > 0) {
                 const headers = Object.keys(data[0]);
                 UI.renderTable(headers, data, currentUser.role, endpoint);
