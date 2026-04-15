@@ -80,6 +80,16 @@ const UI = {
             if (hasActions) {
                 const td = document.createElement('td');
                 
+                if (endpoint === 'billing') {
+                    const billBtn = document.createElement('button');
+                    billBtn.className = 'btn btn-small btn-success';
+                    billBtn.style.marginRight = '5px';
+                    billBtn.textContent = '📄 Bill';
+                    // We link to downloadBill using row.orderId which is now part of the schema
+                    billBtn.onclick = () => UI.downloadBill(row.orderId);
+                    td.appendChild(billBtn);
+                }
+
                 if (role === 'retailer' && endpoint === 'products') {
                     const btn = document.createElement('button');
                     btn.className = 'btn btn-small btn-success';

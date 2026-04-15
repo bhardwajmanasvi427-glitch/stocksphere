@@ -25,7 +25,7 @@ db.serialize(() => {
     db.run(`CREATE TABLE Retailer (RetailerID INTEGER PRIMARY KEY AUTOINCREMENT, RetailerName TEXT, Contact TEXT, Address TEXT)`);
     db.run(`CREATE TABLE Wholesaler (WholesalerID INTEGER PRIMARY KEY, WholesalerName TEXT, Contact TEXT, Address TEXT, GSTNumber TEXT)`);
     db.run(`CREATE TABLE Expenses (id INTEGER PRIMARY KEY AUTOINCREMENT, amount REAL, description TEXT, date TEXT)`);
-    db.run(`CREATE TABLE Billing (id INTEGER PRIMARY KEY AUTOINCREMENT, customerId INTEGER, amount REAL, status TEXT, date TEXT)`);
+    db.run(`CREATE TABLE Billing (id INTEGER PRIMARY KEY AUTOINCREMENT, customerId INTEGER, orderId INTEGER, amount REAL, status TEXT, date TEXT)`);
 
     // Insert Default admin user
     db.run(`INSERT INTO Admin (Name, Password) VALUES ('admin', 'admin123')`);

@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     'expenses': ['id', 'amount', 'description', 'date'],
                     'customers': ['CustomerID', 'Name', 'Contact', 'Address'],
                     'suppliers': ['SupplierID', 'SupplierName', 'Contact', 'Email', 'Address'],
-                    'billing': ['id', 'customerId', 'amount', 'status', 'date'],
+                    'billing': ['id', 'customerId', 'orderId', 'amount', 'status', 'date'],
                     'wholesaler': ['WholesalerID', 'WholesalerName', 'Contact', 'Address', 'GSTNumber'],
                     'retailer': ['RetailerID', 'RetailerName', 'Contact', 'Address'],
                     'delivery': ['DeliveryID', 'OrderID', 'DeliveryStatus', 'DeliveryDate'],

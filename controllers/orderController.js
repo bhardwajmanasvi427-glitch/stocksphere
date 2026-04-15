@@ -81,6 +81,12 @@ exports.placeOrder = async (req, res) => {
             'UPDATE Products SET StockQuantity = StockQuantity - ? WHERE ProductID = ?', 
             [quantity, productID]
         );
+        
+        // AUTO-GENERATE BILLING RECORD
+        await dbHelper.run(req.db,
+            'INSERT INTO Billing (customerId, orderId, amount, status, date) VALUES (?, ?, ?, ?, ?)',
+            [customerId, orderId, total, 'Paid', orderDate]
+        );
 
         // TRIGGER AUTO ORDER CHECK
         await checkAndAutoOrder(req.db, productID);
