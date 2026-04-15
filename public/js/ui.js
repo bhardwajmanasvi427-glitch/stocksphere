@@ -367,24 +367,25 @@ const UI = {
         } catch(e) { console.error('Auto-order list error', e); }
     },
 
-    async loadCustomerFrequency() {
+    async loadRecentPurchasers(limit = 10) {
         try {
-            const res = await fetch('/api/analytics/customer-frequency');
+            const res = await fetch(`/api/analytics/recent-purchasers?limit=${limit}`);
             const data = await res.json();
-            const body = document.getElementById('customer-frequency-list');
+            const body = document.getElementById('recent-purchasers-list');
             if (data.length === 0) {
-                body.innerHTML = '<tr><td colspan="3">No customer data yet.</td></tr>';
+                body.innerHTML = '<tr><td colspan="3">No purchase history yet.</td></tr>';
                 return;
             }
-            body.innerHTML = data.map(c => `
+            body.innerHTML = data.map(o => `
                 <tr>
-                    <td>${c.Name}</td>
-                    <td><strong>${c.orderCount}</strong></td>
-                    <td style="color:#10B981">${this.formatCurrency(c.totalSpent)}</td>
+                    <td>${o.Name}</td>
+                    <td>${o.OrderDate}</td>
+                    <td style="color:#10B981">${this.formatCurrency(o.TotalAmount)}</td>
                 </tr>
             `).join('');
-        } catch(e) { console.error('Customer frequency list error', e); }
+        } catch(e) { console.error('Recent purchasers list error', e); }
     }
 };
+
 
 

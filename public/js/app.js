@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (currentUser.role === 'admin') {
                 UI.loadAutoOrders();
-                UI.loadCustomerFrequency();
+                UI.loadRecentPurchasers();
             }
         } catch(e) { console.error('Error loading dashboard', e); }
     }

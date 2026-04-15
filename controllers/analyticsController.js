@@ -62,3 +62,21 @@ exports.getCustomerFrequency = async (req, res) => {
     }
 };
 
+exports.getRecentPurchasers = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const sql = `
+            SELECT c.Name, o.OrderDate, o.TotalAmount 
+            FROM Customers c 
+            JOIN Orders o ON c.CustomerID = o.CustomerID 
+            ORDER BY o.OrderID DESC 
+            LIMIT ?
+        `;
+        const data = await dbHelper.query(req.db, sql, [limit]);
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+

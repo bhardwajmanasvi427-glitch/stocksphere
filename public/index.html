@@ -248,19 +248,27 @@
                         </div>
                     </div>
 
-                    <!-- CUSTOMER FREQUENCY SECTION -->
+                    <!-- DYNAMIC RECENT PURCHASERS SECTION -->
                     <div class="advanced-analysis dashboard-admin">
-                        <h3 style="color: #3B82F6;">🏆 Top 30 Frequent Customers</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="color: #3B82F6; margin: 0;">⏱️ Recent Purchasers</h3>
+                            <select id="recent-limit" onchange="UI.loadRecentPurchasers(this.value)" style="padding: 5px; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="5">Last 5</option>
+                                <option value="10" selected>Last 10</option>
+                                <option value="20">Last 20</option>
+                                <option value="50">Last 50</option>
+                            </select>
+                        </div>
                         <div class="table-container">
                             <table style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr>
                                         <th>Customer</th>
-                                        <th>Total Orders</th>
-                                        <th>Total Spent</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
                                     </tr>
                                 </thead>
-                                <tbody id="customer-frequency-list">
+                                <tbody id="recent-purchasers-list">
                                     <tr><td colspan="3">Loading data...</td></tr>
                                 </tbody>
                             </table>

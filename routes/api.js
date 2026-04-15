@@ -121,6 +121,7 @@ router.get('/analytics', requireRole(['admin', 'wholesaler', 'retailer']), async
 // FEATURE 1: PROFIT & REVENUE ANALYTICS REPORT
 router.get('/analytics/report', requireRole(['admin']), analyticsCtrl.getAnalytics);
 router.get('/analytics/customer-frequency', requireRole(['admin']), analyticsCtrl.getCustomerFrequency);
+router.get('/analytics/recent-purchasers', requireRole(['admin']), analyticsCtrl.getRecentPurchasers);
 
 
 // 3. ADVANCED ANALYSIS (Admin only)
