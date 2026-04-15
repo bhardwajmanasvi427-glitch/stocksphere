@@ -44,3 +44,21 @@ exports.getAnalytics = async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 };
+
+exports.getCustomerFrequency = async (req, res) => {
+    try {
+        const sql = `
+            SELECT c.Name, COUNT(o.OrderID) as orderCount, SUM(o.TotalAmount) as totalSpent 
+            FROM Customers c 
+            JOIN Orders o ON c.CustomerID = o.CustomerID 
+            GROUP BY c.CustomerID 
+            ORDER BY orderCount DESC 
+            LIMIT 30
+        `;
+        const data = await dbHelper.query(req.db, sql);
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+

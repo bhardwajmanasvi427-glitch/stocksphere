@@ -10,7 +10,7 @@ console.log('Initializing database at:', dbPath);
 
 db.serialize(() => {
     // Drop existing
-    const tables = ['Admin', 'Products', 'Suppliers', 'Customers', 'Orders', 'OrderDetails', 'Payment', 'Delivery', 'Retailer', 'Wholesaler', 'Expenses', 'Payments'];
+    const tables = ['Admin', 'Products', 'Suppliers', 'Customers', 'Orders', 'OrderDetails', 'Payment', 'Delivery', 'Retailer', 'Wholesaler', 'Expenses', 'Billing'];
     tables.forEach(t => db.run(`DROP TABLE IF EXISTS ${t}`));
 
     // CREATE TABLES
@@ -25,7 +25,7 @@ db.serialize(() => {
     db.run(`CREATE TABLE Retailer (RetailerID INTEGER PRIMARY KEY AUTOINCREMENT, RetailerName TEXT, Contact TEXT, Address TEXT)`);
     db.run(`CREATE TABLE Wholesaler (WholesalerID INTEGER PRIMARY KEY, WholesalerName TEXT, Contact TEXT, Address TEXT, GSTNumber TEXT)`);
     db.run(`CREATE TABLE Expenses (id INTEGER PRIMARY KEY AUTOINCREMENT, amount REAL, description TEXT, date TEXT)`);
-    db.run(`CREATE TABLE Payments (id INTEGER PRIMARY KEY AUTOINCREMENT, retailerId INTEGER, amount REAL, status TEXT, date TEXT)`);
+    db.run(`CREATE TABLE Billing (id INTEGER PRIMARY KEY AUTOINCREMENT, customerId INTEGER, amount REAL, status TEXT, date TEXT)`);
 
     // Insert Default admin user
     db.run(`INSERT INTO Admin (Name, Password) VALUES ('admin', 'admin123')`);

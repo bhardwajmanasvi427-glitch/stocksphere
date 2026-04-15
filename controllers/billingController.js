@@ -9,12 +9,12 @@ const dbHelper = {
     }
 };
 
-exports.getPaymentsByRetailer = async (req, res) => {
+exports.getBillingByCustomer = async (req, res) => {
     try {
-        const { retailerId } = req.params;
+        const { customerId } = req.params;
         const data = await dbHelper.query(req.db, 
-            'SELECT * FROM Payments WHERE retailerId = ? ORDER BY date DESC', 
-            [retailerId]
+            'SELECT * FROM Billing WHERE customerId = ? ORDER BY date DESC', 
+            [customerId]
         );
         res.json(data);
     } catch (e) {
@@ -22,9 +22,9 @@ exports.getPaymentsByRetailer = async (req, res) => {
     }
 };
 
-exports.getAllPayments = async (req, res) => {
+exports.getAllBilling = async (req, res) => {
     try {
-        const data = await dbHelper.query(req.db, 'SELECT * FROM Payments ORDER BY date DESC');
+        const data = await dbHelper.query(req.db, 'SELECT * FROM Billing ORDER BY date DESC');
         res.json(data);
     } catch (e) {
         res.status(500).json({ error: e.message });

@@ -355,6 +355,26 @@ const UI = {
                 </tr>
             `).join('');
         } catch(e) { console.error('Auto-order list error', e); }
+    },
+
+    async loadCustomerFrequency() {
+        try {
+            const res = await fetch('/api/analytics/customer-frequency');
+            const data = await res.json();
+            const body = document.getElementById('customer-frequency-list');
+            if (data.length === 0) {
+                body.innerHTML = '<tr><td colspan="3">No customer data yet.</td></tr>';
+                return;
+            }
+            body.innerHTML = data.map(c => `
+                <tr>
+                    <td>${c.Name}</td>
+                    <td><strong>${c.orderCount}</strong></td>
+                    <td style="color:#10B981">${this.formatCurrency(c.totalSpent)}</td>
+                </tr>
+            `).join('');
+        } catch(e) { console.error('Customer frequency list error', e); }
     }
 };
+
 

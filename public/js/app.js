@@ -125,6 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (currentUser.role === 'admin') {
                 UI.loadAutoOrders();
+                UI.loadCustomerFrequency();
             }
         } catch(e) { console.error('Error loading dashboard', e); }
     }
@@ -137,8 +138,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             let actualEndpoint = endpoint;
-            if (endpoint === 'payments' && currentUser.role === 'retailer') {
-                 actualEndpoint = 'payments/1'; // Using RETAILER_MOCK_ID = 1
+            if (endpoint === 'billing' && currentUser.role === 'retailer') {
+                 actualEndpoint = 'billing/1'; // Using RETAILER_MOCK_ID = 1
             }
 
             const data = await API.get(actualEndpoint);
@@ -150,7 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     'expenses': ['id', 'amount', 'description', 'date'],
                     'customers': ['CustomerID', 'Name', 'Contact', 'Address'],
                     'suppliers': ['SupplierID', 'SupplierName', 'Contact', 'Email', 'Address'],
-                    'payments': ['id', 'retailerId', 'amount', 'status', 'date'],
+                    'billing': ['id', 'customerId', 'amount', 'status', 'date'],
                     'wholesaler': ['WholesalerID', 'WholesalerName', 'Contact', 'Address', 'GSTNumber'],
                     'retailer': ['RetailerID', 'RetailerName', 'Contact', 'Address'],
                     'delivery': ['DeliveryID', 'OrderID', 'DeliveryStatus', 'DeliveryDate'],

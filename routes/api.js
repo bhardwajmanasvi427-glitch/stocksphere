@@ -4,7 +4,7 @@ const router = express.Router();
 // Controllers
 const analyticsCtrl = require('../controllers/analyticsController');
 const expenseCtrl = require('../controllers/expenseController');
-const paymentCtrl = require('../controllers/paymentController');
+const billingCtrl = require('../controllers/billingController');
 const orderCtrl = require('../controllers/orderController');
 const billCtrl = require('../controllers/billController');
 
@@ -120,6 +120,7 @@ router.get('/analytics', requireRole(['admin', 'wholesaler', 'retailer']), async
 
 // FEATURE 1: PROFIT & REVENUE ANALYTICS REPORT
 router.get('/analytics/report', requireRole(['admin']), analyticsCtrl.getAnalytics);
+router.get('/analytics/customer-frequency', requireRole(['admin']), analyticsCtrl.getCustomerFrequency);
 
 
 // 3. ADVANCED ANALYSIS (Admin only)
@@ -153,9 +154,9 @@ router.post('/expenses', requireRole(['admin']), expenseCtrl.addExpense);
 // FEATURE 3: BILL GENERATION (PDF)
 router.post('/generate-bill/:orderId', requireRole(['admin', 'retailer', 'wholesaler']), billCtrl.generateBill);
 
-// FEATURE 4: PAYMENTS SECTION
-router.get('/payments/:retailerId', requireRole(['admin', 'retailer']), paymentCtrl.getPaymentsByRetailer);
-router.get('/payments', requireRole(['admin']), paymentCtrl.getAllPayments);
+// FEATURE 4: BILLING SECTION (Renamed from Payments)
+router.get('/billing/:customerId', requireRole(['admin', 'retailer']), billingCtrl.getBillingByCustomer);
+router.get('/billing', requireRole(['admin']), billingCtrl.getAllBilling);
 
 // FEATURE 5: AUTO STOCK MANAGEMENT (VISIBILITY)
 router.get('/auto-orders', requireRole(['admin']), orderCtrl.getAutoOrders);

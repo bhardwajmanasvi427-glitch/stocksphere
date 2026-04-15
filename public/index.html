@@ -56,10 +56,9 @@
                 <a href="#" data-target="products">Products</a>
                 <a href="#" data-target="orders">Orders</a>
                 <a href="#" data-target="expenses" class="role-admin">Expenses</a>
-                <a href="#" data-target="payments">Payments</a>
+                <a href="#" data-target="billing">Billing</a>
                 <a href="#" data-target="customers" class="role-admin">Customers</a>
                 <a href="#" data-target="suppliers" class="role-admin">Suppliers</a>
-                <a href="#" data-target="payment" class="role-admin">Payments</a>
                 <a href="#" data-target="delivery" class="role-admin role-wholesaler">Delivery</a>
                 <a href="#" data-target="retailer" class="role-admin">Retailers</a>
                 <a href="#" data-target="wholesaler" class="role-admin">Wholesalers</a>
@@ -230,7 +229,7 @@
                     </div>
 
                     <!-- AUTO ORDER / LOW STOCK ALERT SECTION -->
-                    <div class="advanced-analysis dashboard-admin">
+                    <div class="advanced-analysis dashboard-admin" style="margin-bottom: 2rem;">
                         <h3 style="color: #F59E0B;">⚠️ Low Stock Alerts & Auto-Orders</h3>
                         <div class="table-container">
                             <table style="width: 100%; border-collapse: collapse;">
@@ -248,7 +247,27 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- CUSTOMER FREQUENCY SECTION -->
+                    <div class="advanced-analysis dashboard-admin">
+                        <h3 style="color: #3B82F6;">🏆 Top 30 Frequent Customers</h3>
+                        <div class="table-container">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Total Orders</th>
+                                        <th>Total Spent</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customer-frequency-list">
+                                    <tr><td colspan="3">Loading data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </section>
+
 
 
                 <!-- Dynamic Data Table Section (Used for all CRUD pages) -->
