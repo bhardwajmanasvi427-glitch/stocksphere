@@ -161,6 +161,7 @@ router.get('/billing', requireRole(['admin']), billingCtrl.getAllBilling);
 
 // FEATURE 5: AUTO STOCK MANAGEMENT (VISIBILITY)
 router.get('/auto-orders', requireRole(['admin']), orderCtrl.getAutoOrders);
+router.post('/auto-orders/scan', requireRole(['admin']), orderCtrl.scanAndRestock);
 
 
 

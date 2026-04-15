@@ -359,6 +359,9 @@ const UI = {
 
     async loadAutoOrders() {
         try {
+            // PROACTIVE SCAN ON LOAD
+            await fetch('/api/auto-orders/scan', { method: 'POST' });
+            
             const res = await fetch('/api/auto-orders');
             const data = await res.json();
             const body = document.getElementById('auto-order-list');

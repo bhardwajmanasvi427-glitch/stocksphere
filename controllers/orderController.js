@@ -115,4 +115,20 @@ exports.getAutoOrders = async (req, res) => {
     }
 };
 
-exports.checkAndAutoOrder = checkAndAutoOrder; 
+exports.checkAndAutoOrder = checkAndAutoOrder;
+
+exports.scanAndRestock = async (req, res) => {
+    try {
+        console.log('[SYSTEM] Starting proactive inventory scan...');
+        const lowStockProducts = await dbHelper.query(req.db, 'SELECT ProductID FROM Products WHERE StockQuantity < 50');
+        
+        for (const p of lowStockProducts) {
+            await checkAndAutoOrder(req.db, p.ProductID);
+        }
+        
+        console.log(`[SYSTEM] Scan complete. Processed ${lowStockProducts.length} items.`);
+        res.json({ success: true, count: lowStockProducts.length });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
