@@ -142,11 +142,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const data = await API.get(actualEndpoint);
+            
+            const getDefaults = (ep) => {
+                const map = {
+                    'products': ['ProductID', 'ProductName', 'Category', 'Price', 'StockQuantity'],
+                    'orders': ['OrderID', 'CustomerID', 'OrderDate', 'TotalAmount', 'isAutoOrder'],
+                    'expenses': ['id', 'amount', 'description', 'date'],
+                    'customers': ['CustomerID', 'Name', 'Contact', 'Address'],
+                    'suppliers': ['SupplierID', 'SupplierName', 'Contact', 'Email', 'Address'],
+                    'payments': ['id', 'retailerId', 'amount', 'status', 'date'],
+                    'wholesaler': ['WholesalerID', 'WholesalerName', 'Contact', 'Address', 'GSTNumber'],
+                    'retailer': ['RetailerID', 'RetailerName', 'Contact', 'Address'],
+                    'delivery': ['DeliveryID', 'OrderID', 'DeliveryStatus', 'DeliveryDate'],
+                    'payment': ['PaymentID', 'OrderID', 'PaymentMethod', 'PaymentStatus']
+                };
+                return map[ep.toLowerCase()] || [];
+            };
+
             if (data && data.length > 0) {
                 const headers = Object.keys(data[0]);
                 UI.renderTable(headers, data, currentUser.role, endpoint);
             } else {
-                UI.renderTable([], [], currentUser.role, endpoint);
+                const defaultHeaders = getDefaults(endpoint);
+                UI.renderTable(defaultHeaders, [], currentUser.role, endpoint);
             }
         } catch(e) {
             document.getElementById('table-body').innerHTML = `<tr><td colspan="100%" style="color:red">Error loading data: ${e.message}</td></tr>`;

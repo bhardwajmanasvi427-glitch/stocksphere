@@ -20,30 +20,10 @@ const UI = {
         headRow.innerHTML = '';
         body.innerHTML = '';
 
-        if (!data || data.length === 0) {
-            body.innerHTML = '<tr><td colspan="100%">No records found.</td></tr>';
-            return;
-        }
-
         // Add extra action header if needed
         let hasActions = false;
         if ((role === 'retailer' && endpoint === 'products') || (role === 'wholesaler' && endpoint === 'delivery') || role === 'admin') {
             hasActions = true;
-        }
-
-        // Populate filter sort dropdown dynamically based on available table headers
-        const sortDrop = document.getElementById('sort-column');
-        if (!isSorting) {
-            sortDrop.innerHTML = '<option value="">Sort by...</option>';
-            headers.forEach(h => {
-                const opt = document.createElement('option');
-                opt.value = h;
-                opt.textContent = h;
-                sortDrop.appendChild(opt);
-            });
-            // reset UI state to default
-            sortDrop.value = "";
-            document.getElementById('sort-direction').value = "1";
         }
 
         // Setup headers
@@ -76,6 +56,11 @@ const UI = {
             const th = document.createElement('th');
             th.textContent = 'Actions';
             headRow.appendChild(th);
+        }
+
+        if (!data || data.length === 0) {
+            body.innerHTML = '<tr><td colspan="100%">No records found.</td></tr>';
+            return;
         }
 
         // Setup rows
@@ -229,7 +214,10 @@ const UI = {
             document.getElementById('modalIdValue').value = row[headers[0]];
         }
 
-        headers.forEach(h => {
+        headers.forEach((h, index) => {
+             // Skip Primary Key in Add mode if it's named 'id' or 'ID' or is the first column
+             if (!row && (h.toLowerCase() === 'id' || index === 0)) return;
+
              const group = document.createElement('div');
              group.className = 'input-group';
              const label = document.createElement('label');

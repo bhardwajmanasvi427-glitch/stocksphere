@@ -200,7 +200,7 @@ router.get('/orders', async (req, res) => {
 });
 
 // Everything else 
-const otherTables = ['Customers', 'Suppliers', 'Payment', 'Delivery', 'Retailer', 'Wholesaler'];
+const otherTables = ['Customers', 'Suppliers', 'Payment', 'Delivery', 'Retailer', 'Wholesaler', 'Expenses', 'Payments'];
 otherTables.forEach(table => {
     router.get(`/${table.toLowerCase()}`, async (req, res) => {
         try {
