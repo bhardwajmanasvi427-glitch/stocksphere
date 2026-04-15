@@ -172,9 +172,19 @@ const UI = {
                 body: JSON.stringify({ productID, quantity, price: basePrice })
             });
             const data = await rr.json();
-            alert(data.message || 'Order Placed');
-            document.querySelector('a[data-target="orders"]').click();
-        } catch(e) { alert('Error: ' + e.message); }
+            if (data.success) {
+                alert(data.message || 'Order Placed');
+                // AUTO DOWNLOAD PDF
+                if (data.orderId) this.downloadBill(data.orderId);
+                
+                // REFRESH AUTO ORDERS LIST
+                this.loadAutoOrders();
+                
+                document.querySelector('a[data-target="orders"]').click();
+            } else {
+                throw new Error(data.error || 'Failed to place order');
+            }
+        } catch(e) { alert('Order Error: ' + e.message); }
     },
 
     async updateDelivery(id, status) {

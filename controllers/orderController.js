@@ -50,7 +50,9 @@ const checkAndAutoOrder = async (db, productId) => {
                 [restockQty, productId]
             );
             
-            console.log(`Auto-order placed for ${product.ProductName}. New stock: ${product.StockQuantity + restockQty}`);
+            console.log(`[SYSTEM] Auto-order SUCCESS for ${product.ProductName}. New stock: ${product.StockQuantity + restockQty}`);
+        } else {
+            console.log(`[SYSTEM] Stock for ${product.ProductName} is healthy (${product.StockQuantity}). No auto-order needed.`);
         }
     } catch (e) {
         console.error('Auto-order error:', e);
